@@ -242,69 +242,56 @@
 <div class="ambient a2"></div>
 
 
-<!-- Music player – MP3 based, works locally -->
-<audio id="bgAudio" src="song.mp3" loop preload="auto"></audio>
-
-<div style="
-    position:fixed; bottom:24px; right:24px; z-index:100;
+<!-- Music player – bulletproof version -->
+<div id="musicBar" style="
+    position:fixed; bottom:24px; right:24px; z-index:9999;
     background:rgba(10,7,14,0.97); border:1px solid #3d2f52;
     border-radius:50px; padding:10px 20px 10px 12px;
-    box-shadow:0 8px 40px rgba(0,0,0,0.85), 0 0 0 1px rgba(155,29,58,0.2);
-    backdrop-filter:blur(12px);
+    box-shadow:0 8px 40px rgba(0,0,0,0.85);
     display:flex; align-items:center; gap:12px;
+    font-family:sans-serif;
 ">
-    <button onclick="toggleAudio()" id="audioBtn" style="
-        width:38px;height:38px;border-radius:50%;
+    <button id="audioBtn" style="
+        width:42px;height:42px;border-radius:50%;
         background:linear-gradient(135deg,#9b1d3a,#c42150);
-        border:none;cursor:pointer;color:white;font-size:1em;
-        box-shadow:0 2px 12px rgba(155,29,58,0.5);
-        transition:all .2s; flex-shrink:0;
+        border:none;cursor:pointer;color:white;font-size:1.2em;
+        box-shadow:0 2px 12px rgba(155,29,58,0.6);
+        flex-shrink:0; display:flex; align-items:center; justify-content:center;
     ">▶</button>
     <div>
-        <div style="font-family:'Playfair Display',serif;font-style:italic;color:#e8dff0;font-size:.85em;">Anlatamam</div>
+        <div style="font-style:italic;color:#e8dff0;font-size:.85em;">Anlatamam</div>
         <div style="font-size:.72em;color:#8a7a9a;">Unser Lied ♥</div>
-    </div>
-    <div id="vizPlayer" style="display:flex;align-items:flex-end;gap:2px;height:18px;">
-        <span style="width:3px;background:#c42150;border-radius:2px;height:6px; animation:bar .8s ease-in-out infinite 0s;"></span>
-        <span style="width:3px;background:#c42150;border-radius:2px;height:14px;animation:bar .8s ease-in-out infinite .15s;"></span>
-        <span style="width:3px;background:#c42150;border-radius:2px;height:9px; animation:bar .8s ease-in-out infinite .3s;"></span>
-        <span style="width:3px;background:#c42150;border-radius:2px;height:16px;animation:bar .8s ease-in-out infinite .1s;"></span>
-        <span style="width:3px;background:#c42150;border-radius:2px;height:7px; animation:bar .8s ease-in-out infinite .25s;"></span>
     </div>
 </div>
 
 <script>
-const audio = document.getElementById('bgAudio');
-const btn   = document.getElementById('audioBtn');
-const viz   = document.getElementById('vizPlayer');
-let playing = false;
+(function() {
+    var audio = new Audio('song.mp3');
+    audio.loop = true;
+    audio.volume = 0.6;
+    var btn = document.getElementById('audioBtn');
+    var playing = false;
 
-// Try autoplay on first user interaction
-document.addEventListener('click', function startOnce() {
-    if (!playing) {
-        audio.volume = 0.5;
-        audio.play().then(() => {
-            playing = true;
-            btn.textContent = '❚❚';
-        }).catch(() => {});
-    }
-    document.removeEventListener('click', startOnce);
-}, { capture: true });
-
-function toggleAudio() {
-    if (playing) {
-        audio.pause();
-        playing = false;
-        btn.textContent = '▶';
-        viz.style.opacity = '0.3';
-    } else {
-        audio.play().then(() => {
-            playing = true;
-            btn.textContent = '❚❚';
-            viz.style.opacity = '1';
-        });
-    }
-}
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (playing) {
+            audio.pause();
+            playing = false;
+            btn.innerHTML = '▶';
+        } else {
+            var p = audio.play();
+            if (p !== undefined) {
+                p.then(function() {
+                    playing = true;
+                    btn.innerHTML = '❚❚';
+                }).catch(function(err) {
+                    btn.innerHTML = '⚠';
+                    btn.title = 'Fehler: ' + err.message;
+                });
+            }
+        }
+    });
+})();
 </script>
 
 <div class="page-wrap">
